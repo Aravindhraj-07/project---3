@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection Demo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1><i class="fas fa-shield-alt"></i> Live Fraud Detection</h1>
+    
+    <div class="demo-grid">
+        <!-- Input Form -->
+        <div class="input-panel">
+            <h3>Transaction Details</h3>
+            <form id="fraudForm">
+                <div class="feature-grid">
+                    <!-- Time & Amount -->
+                    <div class="form-group">
+                        <label>Time (seconds)</label>
+                        <input type="number" id="Time" value="0" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount ($)</label>
+                        <input type="number" id="Amount" value="100" step="0.01">
+                    </div>
+                    
+                    <!-- V1-V15 (First row) -->
+                    {% for i in range(1,16) %}
+                    <div class="form-group">
+                        <label>V{{ i }}</label>
+                        <input type="number" id="V{{ i }}" value="0" step="0.001">
+                    </div>
+                    {% endfor %}
+                    
+                    <!-- V16-V28 (Second row) -->
+                    {% for i in range(16,29) %}
+                    <div class="form-group">
+                        <label>V{{ i }}</label>
+                        <input type="number" id="V{{ i }}" value="0" step="0.001">
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <button type="submit" class="predict-btn">
+                    <i class="fas fa-search"></i> Detect Fraud
+                </button>
+            </form>
+        </div>
+        
+        <!-- Results -->
+        <div class="result-panel">
+            <div id="loading" class="loading hidden">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Analyzing transaction...</p>
+            </div>
+            <div id="result" class="result-box hidden">
+                <div class="result-icon" id="resultIcon">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
+                <h2 id="prediction">Analyzing...</h2>
+                <div class="confidence-meter">
+                    <div class="meter">
+                        <div class="meter-fill" id="confidenceFill"></div>
+                    </div>
+                    <p>Confidence: <span id="confidence">0%</span></p>
+                </div>
+                <p class="fraud-prob">
+                    Fraud Probability: <span id="fraudProb">0.00%</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/predict.js') }}"></script>
+</body>
+</html>
