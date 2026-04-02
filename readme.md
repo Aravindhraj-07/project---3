@@ -1,6 +1,8 @@
 # 💳 Credit Card Fraud Detection
 
 
+**Live Demo:** [https://creditcardfraud-96.streamlit.app/](https://creditcardfraud-96.streamlit.app/)
+
 ## 📋 Overview
 
 This project implements an end-to-end **Credit Card Fraud Detection** system using Machine Learning. It detects fraudulent transactions from credit card data using a trained Random Forest classifier deployed as an interactive [Streamlit](https://streamlit.io/) web application.
@@ -25,7 +27,7 @@ This project implements an end-to-end **Credit Card Fraud Detection** system usi
    cd project---3
    streamlit run app.py
    ```
-4. Open [http://localhost:8501](http://localhost:8501) 🎉
+4. Try **Live Demo** [https://creditcardfraud-96.streamlit.app/](https://creditcardfraud-96.streamlit.app/) 🎉
 
 **Dataset Download:** [creditcard.csv from Kaggle](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud/download)
 
@@ -72,20 +74,10 @@ This project implements an end-to-end **Credit Card Fraud Detection** system usi
 ## 📈 Performance
 
 ```
-ROC AUC: ~0.98+ (excellent for fraud detection)
-Accuracy: ~0.999 (imbalanced dataset)
+ROC AUC: ~0.90+ (excellent for fraud detection)
+Accuracy: ~0.93 (imbalanced dataset)
 ```
-*(Exact values from notebook rerun)*
 
-## 🛠️ Tech Stack
-
-| Component | Tech |
-|-----------|------|
-| Web App | Streamlit |
-| ML Model | Scikit-learn (RandomForest) |
-| Persistence | Joblib/Pickle |
-| Data | Pandas, NumPy |
-| Deployment | Streamlit Cloud / Gunicorn |
 
 ## 📁 File Structure
 
@@ -126,5 +118,8 @@ MIT License - feel free to use & modify!
 
 ---
 
-**Built with ❤️ for Microsoft Projects** | Questions? Check [Streamlit Docs](https://docs.streamlit.io/)
+**Created & Maintained by Aravindhraj** 🛠️  
+
+
+| Questions? Check [Streamlit Docs](https://docs.streamlit.io/)
 
