@@ -1,82 +1,101 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
-import joblib
+#importing necessary libraries
+import streamlit as st
+import pickle
 import numpy as np
-import traceback
-import os
+import pandas as pd
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
+# Page config
+st.set_page_config(page_title="Fraud Detection", layout="centered")#page title and layout
 
-# Load model with fallback
-try:
-    model = joblib.load('model.pkl')
-    print("✅ Model loaded successfully!")
-except:
-    print("⚠️ No model.pkl found. Using demo model...")
-    class DemoModel:
-        def predict(self, X):
-            amount = X[0, -1]
-            return np.array([1 if amount > 1000 else 0])
-        def predict_proba(self, X):
-            amount = X[0, -1]
-            prob = min(amount / 5000, 0.95)
-            return np.array([[1-prob, prob]])
-    model = DemoModel()
+# Custom styling
+st.markdown("""
+<style>
+.stButton>button {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 8px;
+}
+</style>
+""", unsafe_allow_html=True)
 
-@app.route('/')
-@app.route('/index.html')
-def index():
-    return render_template('index.html')
+# Load model
+model = pickle.load(open("model.pkl", "rb"))
 
-@app.route('/predict')
-def predict_page():
-    """Serve the predict page"""
-    return render_template('predict.html')
+# Title
+st.title("💳 Credit Card Fraud Detection")
+st.markdown("---")
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    """API endpoint for predictions"""
-    try:
-        data = request.json
-        print(f"📥 Received: {len(data)} features")
-        
-        # Exact 30 features in correct order
-        feature_order = [
-            'Time', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9',
-            'V10','V11','V12','V13','V14','V15','V16','V17','V18','V19',
-            'V20','V21','V22','V23','V24','V25','V26','V27','V28','Amount'
-        ]
-        
-        features = np.zeros((1, 30))
-        for i, feature in enumerate(feature_order):
-            features[0, i] = float(data.get(feature, 0))
-        
-        prediction = model.predict(features)[0]
-        probs = model.predict_proba(features)[0]
-        
-        print(f"🎯 Predicted: {'FRAUD' if prediction else 'LEGIT'}")
-        
-        return jsonify({
-            'success': True,
-            'prediction': 'FRAUD' if prediction == 1 else 'LEGITIMATE',
-            'confidence': float(max(probs) * 100),
-            'fraud_probability': float(probs[1] * 100)
-        })
-        
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 400
+# ==============================
+# SECTION 1: Manual Input
+# ==============================
+st.subheader("Manual Input (Basic Demo)")#subheader for manual input section
 
-@app.route('/about')
-def about():
-    return render_template('about.html')
+col1, col2 = st.columns(2)#creating two columns for input fields
 
-# Serve static files
-@app.route('/static/<path:filename>')
-def static_files(filename):
-    return send_from_directory(app.static_folder, filename)
+with col1:
+    amount = st.number_input("Transaction Amount", min_value=0.0)
 
-if __name__ == '__main__':
-    print("🚀 Starting Fraud Detection Server...")
-    print("📱 Visit: http://localhost:5000")
-    print("🔍 Demo: http://localhost:5000/predict")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+with col2:
+    time = st.number_input("Transaction Time", min_value=0.0)
+
+# Create feature array
+features = np.zeros(30)
+features[0] = time
+features[-1] = amount
+features = features.reshape(1, -1)
+
+if st.button("Check Transaction"):#button to trigger prediction
+    prediction = model.predict(features)#predicting using the model and the input features
+
+    if prediction[0] == 1:#if prediction is 1, it is a fraudulent transaction
+        st.error("🚨 Fraudulent Transaction")
+    else:#if prediction is 0, it is a legitimate transaction
+        st.success("✅ Legitimate Transaction")
+
+st.markdown("---")
+
+# ==============================
+# SECTION 2: CSV Upload (Accurate)
+#The dataset uses PCA-transformed features (V1–V28), which are not interpretable, 
+# so I provided alternative input methods like CSV upload and sample test buttons for demonstration purposes.
+st.subheader("Upload CSV for Accurate Prediction")
+
+uploaded_file = st.file_uploader("Upload transaction file", type=["csv"])
+
+if uploaded_file is not None:
+    data = pd.read_csv(uploaded_file)
+
+    st.write("Preview of Data:")
+    st.write(data.head())
+
+    if st.button("Predict from CSV"):
+        prediction = model.predict(data)
+
+        st.write("Predictions:")
+        st.write(prediction)
+
+st.markdown("---")
+
+# ==============================
+# SECTION 3: Sample Test Buttons
+# for demonstration, we can create buttons that simulate typical legitimate
+#  and fraudulent transactions based on the dataset's characteristics.
+st.subheader("Quick Test Examples")
+
+if st.button("Test Legitimate Example"):#button to test a sample legitimate transaction
+    sample = np.zeros((1, 30))
+    sample[0][0] = 10000
+    sample[0][-1] = 50
+
+    prediction = model.predict(sample)
+
+    st.success(f"Prediction: {prediction[0]} (Likely Legitimate)")
+
+if st.button("Test Fraud Example"):#button to test a sample fraudulent transaction
+    sample = np.zeros((1, 30))
+    sample[0][0] = 10
+    sample[0][-1] = 5000
+
+    prediction = model.predict(sample)
+
+    st.error(f"Prediction: {prediction[0]} (Possible Fraud)")#displaying the prediction result for the sample fraudulent transaction
